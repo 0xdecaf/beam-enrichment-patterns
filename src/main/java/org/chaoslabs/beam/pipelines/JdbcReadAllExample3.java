@@ -142,33 +142,34 @@ public class JdbcReadAllExample3 {
         .apply("Compose Final Object", ParDo.of(new DoFn<KV<String, CoGbkResult>, String>(){
             @ProcessElement
             public void processElement(ProcessContext c) {
-                // At this point, we have our original data and all enriched records available to process.
-                // If there are more than one record and getOnly is used, an exception will be raised.
-                // It's critical that the same key isn't used in the same window otherwise we will have duplicate
-                // original records.  When we explore natural keys for the pipeline we'll revisit this.
-                String originalUrl = c.element().getValue().getOnly(ORIGINAL_TAG);
 
-                /* The output of the SQL query can return multiple records. */
-                // Iterable<String> jsonRecords = c.element().getValue().getAll(ENRICHED_TAG);
+              // At this point, we have our original data and all enriched records available to process.
+              // If there are more than one record and getOnly is used, an exception will be raised.
+              // It's critical that the same key isn't used in the same window otherwise we will have duplicate
+              // original records.  When we explore natural keys for the pipeline we'll revisit this.
+              String originalUrl = c.element().getValue().getOnly(ORIGINAL_TAG);
 
-                // In our case, we know there is just a single record because we're using a unique key when querying the database.
-                // The original URL is also available in the JSON data so we can skip combining these two datasets.
-                // c.output(c.element().getValue().getOnly(ENRICHED_TAG));
+              /* The output of the SQL query can return multiple records. */
+              // Iterable<String> jsonRecords = c.element().getValue().getAll(ENRICHED_TAG);
 
-                // In our case, we know there is just a single record because we're using a unique key when querying the database.
-                // Read the JSON to add the original data
-                Type type = new TypeToken<Map<String, Object>>(){}.getType();
-                Gson gson = new Gson();
+              // In our case, we know there is just a single record because we're using a unique key when querying the database.
+              // The original URL is also available in the JSON data so we can skip combining these two datasets.
+              // c.output(c.element().getValue().getOnly(ENRICHED_TAG));
 
-                // If there are no results, this will throw an exception.
-                // If there are more than one result, this will throw an exception.
-                Map<String, Object> data = gson.fromJson(c.element().getValue().getOnly(ENRICHED_TAG), type);
+              // In our case, we know there is just a single record because we're using a unique key when querying the database.
+              // Read the JSON to add the original data
+              Type type = new TypeToken<Map<String, Object>>(){}.getType();
+              Gson gson = new Gson();
 
-                // Append the timestamp to the output so analytics can have a date to work with.
-                data.put("timestamp", c.timestamp().getMillis());
-                data.put("url", originalUrl);
-                String output = gson.toJson(data);
-                c.output(output);
+              // If there are no results, this will throw an exception.
+              // If there are more than one result, this will throw an exception.
+              Map<String, Object> data = gson.fromJson(c.element().getValue().getOnly(ENRICHED_TAG), type);
+
+              // Append the timestamp to the output so analytics can have a date to work with.
+              data.put("timestamp", c.timestamp().getMillis());
+              data.put("url", originalUrl);
+              String output = gson.toJson(data);
+              c.output(output);
 
             }
         }));

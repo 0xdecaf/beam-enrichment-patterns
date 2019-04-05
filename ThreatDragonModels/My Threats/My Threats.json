@@ -1,9 +1,12 @@
 {
   "summary": {
-    "title": "My Threats"
+    "title": "My Threats",
+    "description": "My High level description",
+    "owner": "Ownr Fld"
   },
   "detail": {
     "contributors": [],
-    "diagrams": []
+    "diagrams": [],
+    "reviewer": "Reviewr Fld"
   }
 }
